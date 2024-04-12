@@ -1,6 +1,9 @@
 import { Telegraf } from "telegraf";
 import userModel from "./src/models/user";
+import connectDB from "./src/config/db";
+
 const bot = new Telegraf(process.env.BOT_TOKEN ?? "");
+connectDB();
 
 bot.start(async (ctx) => {
   // store the user information into db
@@ -26,7 +29,7 @@ bot.start(async (ctx) => {
       }
     );
     await ctx.reply(`
-    Hey! ${from.first_name}, Wlcome. I will be writing highly engaging social media posts for you 🚀 Just keep feeding me with the events throught the day. Let's shine on social media ✨`);
+    Hey! ${from.first_name}, Welcome. I will be writing highly engaging social media posts for you 🚀 Just keep feeding me with the events throught the day. Let's shine on social media ✨`);
   } catch (error) {
     console.error("Error while saving user information", error);
     await ctx.reply("Something went wrong. Please try again later.");

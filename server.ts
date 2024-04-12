@@ -38,8 +38,6 @@ bot.start(async (ctx) => {
 });
 
 bot.command("generate", async (ctx) => {
-  // store token count
-  // send response.
   const from = ctx.update.message?.from;
   if (!from) return;
   const user = await userModel.findOne({ tgId: from.id });
@@ -47,6 +45,17 @@ bot.command("generate", async (ctx) => {
     await ctx.reply("Please start the bot to use it.");
     return;
   }
+  const waitingMessage = await ctx.reply(
+    `Hey! ${from.first_name}, I am generating the posts for you. Please wait... 🕒`
+  );
+
+  const waitingMessageId = waitingMessage.message_id;
+
+  const loadingStickerMessage = await ctx.replyWithSticker(
+    "CAACAgIAAxkBAAMUZhjxsUEZAYKWEz-qMiiLUUgJfP8AAokKAAJxbolL05dc6IwrA7A0BA"
+  );
+
+  const loadingStickerMessageId = loadingStickerMessage.message_id;
   // get events for the user
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
@@ -62,6 +71,8 @@ bot.command("generate", async (ctx) => {
     },
   });
   if (events.length === 0) {
+    await ctx.deleteMessage(waitingMessageId);
+    await ctx.deleteMessage(loadingStickerMessageId);
     await ctx.reply("No events found. Please add some events first.");
     return;
   }
@@ -83,7 +94,26 @@ bot.command("generate", async (ctx) => {
           ${events.map((event) => event.text).join(", ")},`,
         },
       ],
+
+      // store token cound
     });
+    await userModel.findOneAndUpdate(
+      {
+        tgId: from.id,
+      },
+      {
+        $inc: {
+          propmtTokens: chatCompletion.usage?.prompt_tokens,
+          completionTokens: chatCompletion.usage?.completion_tokens,
+        },
+      }
+    );
+
+    await ctx.deleteMessage(waitingMessageId);
+    await ctx.deleteMessage(loadingStickerMessageId);
+    await ctx.reply(
+      `Here are the posts for today:\n\n${chatCompletion.choices[0].message.content}`
+    );
   } catch (error) {
     console.error("Error while generating posts", error);
     await ctx.reply("Something went wrong. Please try again later.");
@@ -114,6 +144,11 @@ bot.on(message("text"), async (ctx) => {
   }
 });
 
+bot.help((ctx) =>
+  ctx.reply(
+    "I am here to help you with generating social media posts. Just keep feeding me with the events throught the day. To generate the posts, just enter the command: /generate \n For support contact @amitamrutiya2210"
+  )
+);
 bot.launch();
 
 process.once("SIGINT", () => bot.stop("SIGINT"));

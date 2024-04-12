@@ -3,9 +3,10 @@ import { message } from "telegraf/filters";
 import userModel from "./src/models/user";
 import connectDB from "./src/config/db";
 import eventModel from "./src/models/event";
+import connectOpenAI from "./src/config/openai";
 const bot = new Telegraf(process.env.BOT_TOKEN ?? "");
 connectDB();
-
+connectOpenAI();
 bot.start(async (ctx) => {
   // store the user information into db
   const from = ctx.update.message?.from;
@@ -38,7 +39,6 @@ bot.start(async (ctx) => {
 });
 
 bot.command("generate", async (ctx) => {
-  // make openai api call
   // store token count
   // send response.
   const from = ctx.update.message?.from;
@@ -66,6 +66,8 @@ bot.command("generate", async (ctx) => {
     await ctx.reply("No events found. Please add some events first.");
     return;
   }
+
+  // make openai api call
 });
 
 bot.on(message("text"), async (ctx) => {

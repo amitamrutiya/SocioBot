@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "mongoose": "^8.3.1",
-    "openai-node": "^1.0.5",
+    "openai": "^4.33.0",
     "telegraf": "^4.16.3"
   }
 }

@@ -37,6 +37,37 @@ bot.start(async (ctx) => {
   }
 });
 
+bot.command("generate", async (ctx) => {
+  // make openai api call
+  // store token count
+  // send response.
+  const from = ctx.update.message?.from;
+  if (!from) return;
+  const user = await userModel.findOne({ tgId: from.id });
+  if (!user) {
+    await ctx.reply("Please start the bot to use it.");
+    return;
+  }
+  // get events for the user
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const events = await eventModel.find({
+    tgId: from.id.toString(),
+    createdAt: {
+      $gte: startOfDay,
+      $lte: endOfDay,
+    },
+  });
+  if (events.length === 0) {
+    await ctx.reply("No events found. Please add some events first.");
+    return;
+  }
+});
+
 bot.on(message("text"), async (ctx) => {
   const from = ctx.update.message?.from;
   if (!from) return;
@@ -47,13 +78,18 @@ bot.on(message("text"), async (ctx) => {
   }
   const message = ctx.update.message?.text;
   try {
+    await eventModel.create({
+      text: message,
+      tgId: from.id,
+    });
+
+    await ctx.reply(
+      "Noted 📝, keep texxting me your thoughts. To geenrate the posts, just enter the command: /generate"
+    );
   } catch (error) {
     console.error("Error while saving event information", error);
     await ctx.reply("Something went wrong. Please try again later.");
   }
-
-  // generate the post
-  await ctx.reply("Your post is ready 🚀");
 });
 
 bot.launch();

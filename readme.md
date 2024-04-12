@@ -1,6 +1,6 @@
-# Social Media Post Generator Bot
+# Social Media Post Generator Bot 🤖[(Link)](https://t.me/socio_media_bot)
 
-This project is a Telegram bot that generates engaging social media posts based on the events you feed it throughout the day. It uses OpenAI's GPT-3 model to generate the posts.
+This project is a Telegram bot that generates engaging social media posts based on the events you feed it throughout the day. It uses OpenAI's model to generate the posts.
 
 ## Getting Started
 

@@ -120,6 +120,12 @@ bot.command("generate", async (ctx) => {
   }
 });
 
+bot.help((ctx) =>
+  ctx.reply(
+    "I am here to help you with generating social media posts. Just keep feeding me with the events throught the day. To generate the posts, just enter the command: /generate \nFor support contact @amitamrutiya2210"
+  )
+);
+
 bot.on(message("text"), async (ctx) => {
   const from = ctx.update.message?.from;
   if (!from) return;
@@ -144,11 +150,6 @@ bot.on(message("text"), async (ctx) => {
   }
 });
 
-bot.help((ctx) =>
-  ctx.reply(
-    "I am here to help you with generating social media posts. Just keep feeding me with the events throught the day. To generate the posts, just enter the command: /generate \n For support contact @amitamrutiya2210"
-  )
-);
 bot.launch();
 
 process.once("SIGINT", () => bot.stop("SIGINT"));

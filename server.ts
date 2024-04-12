@@ -6,7 +6,6 @@ import eventModel from "./src/models/event";
 import connectOpenAI from "./src/config/openai";
 const bot = new Telegraf(process.env.BOT_TOKEN ?? "");
 connectDB();
-connectOpenAI();
 bot.start(async (ctx) => {
   // store the user information into db
   const from = ctx.update.message?.from;
@@ -68,6 +67,27 @@ bot.command("generate", async (ctx) => {
   }
 
   // make openai api call
+  try {
+    const openai = await connectOpenAI();
+    const chatCompletion = await openai!.chat.completions.create({
+      model: process.env.OPENAI_MODEL ?? "",
+      messages: [
+        {
+          role: "system",
+          content:
+            "As a senior copywriter, your task is to craft highly engaging social media posts for a client. They have provided you with several events to promote, and your goal is to create captivating and creative posts for each one. Ensure that the posts are engaging and impactful. Here are the events shared by the client:",
+        },
+        {
+          role: "user",
+          content: `Write like a human, for humans: Craft three engaging social media posts tailored for LinkedIn, Facebook, and Twitter audiences. Use the given time labels solely to understand the order of events; do not mention the time in the posts. Each post should creatively highlight the following events. Ensure the tone is conversational and impactful, focusing on engaging the respective platform's audience, encouraging them to take action, and sparking conversations. The client wants the posts to be engaging and creative, and has shared the following events with you:
+          ${events.map((event) => event.text).join(", ")},`,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Error while generating posts", error);
+    await ctx.reply("Something went wrong. Please try again later.");
+  }
 });
 
 bot.on(message("text"), async (ctx) => {
